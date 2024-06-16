@@ -28,19 +28,6 @@ code {
 .form-control{
   border-color: black !important;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 .uploaded{
   margin-top: 30px;
  width: 100%;
@@ -55,20 +42,6 @@ code {
   display: flex;
     flex-direction: column;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .pdf-div{
   padding: 50px;
   background-color: #dedede;
