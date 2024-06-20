@@ -71,4 +71,16 @@ PDF Database Renderer is a backend application that stores PDFs in a MongoDB dat
 
 
 
+## Demo
+
+![Upload PDF](./screenshots/Screenshot%202024-06-20%20185045.png)
+Get PDF 
+             
+
+
+
+![View PDF](./screenshots/Screenshot%202024-06-20%20185113.png)
+Upload PDF
+
+
 
