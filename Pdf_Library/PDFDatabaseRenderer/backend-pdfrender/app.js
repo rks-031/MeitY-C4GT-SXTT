@@ -5,17 +5,16 @@ app.use(express.json());
 const cors = require("cors");
 app.use(cors());
 app.use("/files", express.static("files"));
-const mongoUrl =
-  "mongodb+srv://vinayakrajqaz:ilMrRGlfBThyTBeF@cluster0.kiqayjc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+const mongoUrl = "mongodb+srv://vinayakrajqaz:ilMrRGlfBThyTBeF@cluster0.kiqayjc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose
-  .connect(mongoUrl, {
-    useNewUrlParser: true,
-  })
+  .connect(mongoUrl)
   .then(() => {
     console.log("Connected to database");
   })
   .catch((e) => console.log(e));
+
 const multer = require("multer");
 
 const storage = multer.diskStorage({
@@ -49,7 +48,9 @@ app.get("/get-files", async (req, res) => {
     PdfSchema.find({}).then((data) => {
       res.send({ status: "ok", data: data });
     });
-  } catch (error) {}
+  } catch (error) {
+    res.json({ status: error });
+  }
 });
 
 app.get("/", async (req, res) => {
