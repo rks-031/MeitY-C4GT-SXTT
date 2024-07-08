@@ -1,0 +1,17 @@
+{
+  "name": "pdfrenderlib",
+  "version": "1.0.0",
+  "main": "dist/PdfComp.js",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-pdf": "^7.4.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "scripts": {
+    "build": "babel src --out-dir dist"
+  }
+}
