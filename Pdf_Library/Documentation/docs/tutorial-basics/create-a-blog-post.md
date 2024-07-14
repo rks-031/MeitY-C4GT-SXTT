@@ -2,33 +2,80 @@
 sidebar_position: 3
 ---
 
-# Create a Blog Post
+# PDF Database Renderer Backend
 
-Docusaurus creates a **page for each blog post**, but also a **blog index page**, a **tag system**, an **RSS** feed...
+## Introduction
 
-## Create your first Post
+PDF Database Renderer is a backend application that stores PDFs in a MongoDB database and provides API endpoints to retrieve these PDFs. The application is built using Node.js, Express, MongoDB, and Multer for handling file uploads.
 
-Create a file at `blog/2021-02-28-greetings.md`:
+## Features
 
-```md title="blog/2021-02-28-greetings.md"
----
-slug: greetings
-title: Greetings!
-authors:
-  - name: Joel Marcey
-    title: Co-creator of Docusaurus 1
-    url: https://github.com/JoelMarcey
-    image_url: https://github.com/JoelMarcey.png
-  - name: Sébastien Lorber
-    title: Docusaurus maintainer
-    url: https://sebastienlorber.com
-    image_url: https://github.com/slorber.png
-tags: [greetings]
----
+- Implement server-side code for PDF Database Renderer.
+- Configure MongoDB as the database.
+- Set up Multer to handle multipart/form-data.
+- Create API endpoints for PDF retrieval.
+- Integrate PDF processing and storage with MongoDB.
+- Ensure error handling and validation for file uploads.
 
-Congratulations, you have made your first post!
+## Prerequisites
 
-Feel free to play around and edit this post as much as you like.
-```
+- Node.js and npm installed.
+- MongoDB installed and running.
 
-A new blog post is now available at [http://localhost:3000/blog/greetings](http://localhost:3000/blog/greetings).
+## Installation
+
+1. Clone the repository:
+
+    ```bash
+    git clone PROJECT_REPO_LINK
+    cd pdf-database-renderer
+    ```
+
+2. Install the dependencies:
+
+    ```bash
+    npm install
+    ```
+
+3. Create a `.env` file in the root directory and add your MongoDB URI:
+
+    ```env
+    MONGO_URI=your_mongodb_uri
+    ```
+
+## Usage
+
+1. Start the server:
+
+    ```bash
+    npm run dev
+    ```
+
+2. The server will run on `http://localhost:5000`.
+
+## API Endpoints
+
+### Upload PDF
+
+- **URL**: `/upload`
+- **Method**: `POST`
+- **Description**: Upload a PDF file.
+- **Headers**:
+  - `Content-Type`: `multipart/form-data`
+- **Body**:
+  - `file`: The PDF file to upload.
+- **Response**:
+  - `200 OK`: If the PDF is uploaded successfully.
+  - `400 Bad Request`: If there's an error in the file upload.
+
+## Dependencies
+
+- **express**: Fast, unopinionated, minimalist web framework for Node.js.
+- **mongoose**: MongoDB object modeling tool.
+- **multer**: Node.js middleware for handling multipart/form-data.
+- **nodemon**: Utility that monitors for any changes in your source and automatically restarts your server.
+
+## Error Handling and Validation
+
+- Proper error handling is implemented for file uploads, database operations, and invalid requests.
+- Validation is done to ensure that only PDF files are uploaded.
