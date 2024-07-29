@@ -1,14 +1,38 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: bisque;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
 .App {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  margin: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 59px;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure it covers full height of the viewport */
 }
 
 .formStyle {
-  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid black;
+  width: 25%;
+  text-align: center;
 }
 
 .form-control {
+  border-color: black !important;
   margin-bottom: 10px;
   padding: 10px;
   width: 300px;
@@ -17,16 +41,36 @@
 .btn {
   padding: 10px 20px;
   margin: 5px;
+  background-color: orange;
 }
 
 .uploaded {
-  margin-top: 20px;
+  margin-top: 30px;
+  width: 100%;
+  text-align: center;
+}
+
+.output-div {
+  display: flex;
+  justify-content: space-evenly;
 }
 
 .inner-div {
+  display: flex;
+  flex-direction: column;
   border: 1px solid #ccc;
   padding: 20px;
   margin-top: 10px;
+}
+
+.pdf-div {
+  padding: 50px;
+  background-color: #dedede;
+  margin-top: 50px;
+}
+
+canvas.react-pdf__Page__canvas {
+  margin-bottom: 50px;
 }
 
 .custom-text-layer {
@@ -36,4 +80,3 @@
   width: 100%;
   height: 100%;
 }
-

@@ -3,6 +3,7 @@ import axios from "axios";
 import { pdfjs } from "react-pdf";
 import PdfComp from "./PdfComp";
 import "./App.css"; 
+import Header from "./Header";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -20,7 +21,7 @@ function App() {
   }, []);
 
   const getPdf = async () => {
-    const result = await axios.get("http://localhost:5000/get-files");
+    const result = await axios.get("http://localhost:4000/get-files");
     console.log(result.data.data);
     setAllImage(result.data.data);
   };
@@ -33,7 +34,7 @@ function App() {
     console.log(title, file);
 
     const result = await axios.post(
-      "http://localhost:5000/upload-files",
+      "http://localhost:4000/upload-files",
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" },
@@ -47,10 +48,10 @@ function App() {
   };
 
   const togglePdf = (pdf) => {
-    if (pdfFile === `http://localhost:5000/files/${pdf}`) {
+    if (pdfFile === `http://localhost:4000/files/${pdf}`) {
       setPdfFile(null); // Hide PDF if already shown
     } else {
-      setPdfFile(`http://localhost:5000/files/${pdf}`); // Show PDF
+      setPdfFile(`http://localhost:4000/files/${pdf}`); // Show PDF
     }
   };
 
@@ -63,6 +64,7 @@ function App() {
 
   return (
     <div className="App">
+      <Header/>
       <div className="uploaded">
         <h4>Uploaded PDF:</h4>
         <div className="output-div">
@@ -73,11 +75,12 @@ function App() {
                   <h6>Title: {data.title}</h6>
                   <button
                     className="btn btn-primary"
+                    style={{backgroundColor:"orange"}}
                     onClick={() => togglePdf(data.pdf)}
                   >
-                    {pdfFile === `http://localhost:5000/files/${data.pdf}`
-                      ? "Hide Pdf"
-                      : "Show Pdf"}
+                    {pdfFile === `http://localhost:4000/files/${data.pdf}`
+                      ? "Hide"
+                      : "Show"}
                   </button>
                 </div>
               ))}
