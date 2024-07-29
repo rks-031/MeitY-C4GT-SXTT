@@ -17,6 +17,7 @@ code {
     align-items: center;
     padding-top: 30px;
     flex-direction: column;
+    background-color: bisque;
 }
 .formStyle{
   padding: 20px;
