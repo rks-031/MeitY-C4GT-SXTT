@@ -1,7 +1,6 @@
 import React from "react";
 import "./Header.css";
-import logo from "./karmayogi-bharat-logo.png"; // Ensure you have this logo in your project
-
+import logo from "./karmayogi-bharat-logo.png"; 
 const Header = () => {
   return (
     <header className="header">
@@ -16,9 +15,6 @@ const Header = () => {
         <a href="#tenders">Tenders</a>
         <a href="#contact">Contact Us</a>
       </nav>
-      {/* <div className="language-switcher">
-        <button>English</button>
-      </div> */}
     </header>
   );
 };
