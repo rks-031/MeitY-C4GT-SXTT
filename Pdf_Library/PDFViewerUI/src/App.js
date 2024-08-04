@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { pdfjs } from "react-pdf";
 import PdfComp from "./PdfComp";
-import "./App.css"; 
+import Header from "./Header";
+import "./App.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -35,6 +36,7 @@ function App() {
 
   return (
     <div className="App">
+      <Header />
       <form className="formStyle" onSubmit={submitImage}>
         <h4>Upload Pdf</h4>
         <br />
@@ -47,7 +49,7 @@ function App() {
           onChange={(e) => setFile(e.target.files[0])}
         />
         <br />
-        <button className="btn btn-primary" type="submit">
+        <button className="btn btn-primary open" style={{backgroundColor:"orange"}} type="submit">
           Open
         </button>
       </form>

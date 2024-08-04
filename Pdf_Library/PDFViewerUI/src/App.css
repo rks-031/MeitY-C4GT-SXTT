@@ -1,22 +1,66 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
 .App {
   font-family: Arial, sans-serif;
   text-align: center;
-  margin: 20px;
+  background-color: #fce5cc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 80px; /* Ensure content starts below the header */
 }
 
 .formStyle {
-  margin-bottom: 20px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
 }
 
 .form-control {
   margin-bottom: 10px;
   padding: 10px;
-  width: 300px;
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
 .btn {
   padding: 10px 20px;
   margin: 5px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  background-color: orange;
+}
+
+.btn-primary {
+  background-color: orange;
+
+}
+.open{
+  background-color: orange;
+}
+
+.btn-primary:hover {
+  background-color: orange;
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  transform: scale(1.05);
 }
 
 .uploaded {
@@ -27,6 +71,9 @@
   border: 1px solid #ccc;
   padding: 20px;
   margin-top: 10px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .custom-text-layer {
@@ -36,4 +83,3 @@
   width: 100%;
   height: 100%;
 }
-

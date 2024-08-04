@@ -20,20 +20,20 @@ function PdfComp({ pdfFile }) {
   }
 
   return (
-    <div className="pdf-div">
+    <div className="pdf-container">
       <div className="navigation">
         <button
-          className="btn btn-secondary"
+          className="btn btn-prev"
           onClick={goToPrevPage}
           disabled={pageNumber <= 1}
         >
           Previous Page
         </button>
-        <span>
+        <span className="page-info">
           Page {pageNumber} of {numPages}
         </span>
         <button
-          className="btn btn-secondary"
+          className="btn btn-next"
           onClick={goToNextPage}
           disabled={pageNumber >= numPages}
         >
