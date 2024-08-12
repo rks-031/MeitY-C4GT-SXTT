@@ -10,7 +10,6 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware for logging requests
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 app.use(morgan('combined', { stream: accessLogStream }));
 
@@ -23,7 +22,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// JWT Authentication Middleware
+
 const authenticateJWT = (req, res, next) => {
     const token = req.header('Authorization')?.split(' ')[1];
 
@@ -56,8 +55,6 @@ const authenticateJWT = (req, res, next) => {
 // });
 app.post('/api/login', (req, res) => {
     const { username, email } = req.body;
-
-    // Generate a JWT token
     const token = jwt.sign(
         { name: username, email: email },
         process.env.JWT_SECRET,
@@ -67,8 +64,6 @@ app.post('/api/login', (req, res) => {
     res.json({ token });
 });
 
-
-// Setup the LRS (SCORM Cloud)
 let lrs;
 try {
     lrs = new TinCan.LRS({
@@ -83,7 +78,7 @@ try {
     process.exit(1);
 }
 
-// Endpoint to Handle Video Content Metadata
+
 app.post('/api/video-metadata', authenticateJWT, (req, res) => {
     const { videoId, title, description, duration, format } = req.body;
 
@@ -92,17 +87,15 @@ app.post('/api/video-metadata', authenticateJWT, (req, res) => {
         return res.status(400).send("Missing video metadata in request body");
     }
 
-    // Log received metadata
+    
     console.log("Received video metadata:", { videoId, title, description, duration, format });
 
-    // Validate video format compatibility
     const supportedFormats = ['mp4', 'avi', 'mov'];
     if (!supportedFormats.includes(format)) {
         console.error(`Unsupported video format: ${format}`);
         return res.status(400).send(`Unsupported video format: ${format}`);
     }
 
-    // Create a TinCan statement for storing in SCORM Cloud
     const statement = new TinCan.Statement({
         actor: {
             mbox: `mailto:${req.user.email}`,
@@ -131,7 +124,7 @@ app.post('/api/video-metadata', authenticateJWT, (req, res) => {
 
     console.log("Attempting to save video metadata statement:", statement);
 
-    // Save the statement to SCORM Cloud
+  
     lrs.saveStatement(statement, {
         callback: function (err, xhr) {
             if (err !== null) {
@@ -146,7 +139,6 @@ app.post('/api/video-metadata', authenticateJWT, (req, res) => {
     });
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
     console.error("An error occurred:", err.message);
     res.status(500).send("Internal Server Error");
