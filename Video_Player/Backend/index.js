@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const morgan = require('morgan');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -22,7 +23,7 @@ app.use((req, res, next) => {
     next();
 });
 
-
+// JWT authentication middleware
 const authenticateJWT = (req, res, next) => {
     const token = req.header('Authorization')?.split(' ')[1];
 
@@ -40,19 +41,32 @@ const authenticateJWT = (req, res, next) => {
     }
 };
 
-// // Route to Generate JWT Token (For Testing Purposes)
-// app.post('/api/login', (req, res) => {
-//     const { username, email } = req.body;
+// Multer setup for file upload
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
 
-//     // Generate a JWT token
-//     const token = jwt.sign(
-//         { name: username, email: email },
-//         process.env.JWT_SECRET,
-//         { expiresIn: '1h' }
-//     );
+const upload = multer({ 
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        const filetypes = /mp4|avi|mov/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
 
-//     res.json({ token });
-// });
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb("Error: Only videos are allowed!");
+        }
+    }
+});
+
+// Route to Generate JWT Token (For Testing Purposes)
 app.post('/api/login', (req, res) => {
     const { username, email } = req.body;
     const token = jwt.sign(
@@ -78,23 +92,22 @@ try {
     process.exit(1);
 }
 
+// Route to upload video and save metadata
+app.post('/api/upload-video', [authenticateJWT, upload.single('video')], (req, res) => {
+    const { title, description, duration } = req.body;
+    const video = req.file;
 
-app.post('/api/video-metadata', authenticateJWT, (req, res) => {
-    const { videoId, title, description, duration, format } = req.body;
+    if (!video) {
+        console.error("No video file uploaded");
+        return res.status(400).send("No video file uploaded");
+    }
 
-    if (!videoId || !title || !duration || !format) {
+    if (!title || !duration) {
         console.error("Missing video metadata in request body");
         return res.status(400).send("Missing video metadata in request body");
     }
 
-    
-    console.log("Received video metadata:", { videoId, title, description, duration, format });
-
-    const supportedFormats = ['mp4', 'avi', 'mov'];
-    if (!supportedFormats.includes(format)) {
-        console.error(`Unsupported video format: ${format}`);
-        return res.status(400).send(`Unsupported video format: ${format}`);
-    }
+    console.log("Received video metadata:", { title, description, duration, format: video.mimetype });
 
     const statement = new TinCan.Statement({
         actor: {
@@ -106,7 +119,7 @@ app.post('/api/video-metadata', authenticateJWT, (req, res) => {
             display: { "en-US": "experienced" }
         },
         object: {
-            id: `http://example.com/videos/${videoId}`,
+            id: `http://example.com/videos/${video.filename}`,
             definition: {
                 name: { "en-US": title },
                 description: { "en-US": description }
@@ -117,14 +130,13 @@ app.post('/api/video-metadata', authenticateJWT, (req, res) => {
         },
         context: {
             extensions: {
-                "http://example.com/metadata/format": format
+                "http://example.com/metadata/format": video.mimetype
             }
         }
     });
 
     console.log("Attempting to save video metadata statement:", statement);
 
-  
     lrs.saveStatement(statement, {
         callback: function (err, xhr) {
             if (err !== null) {
@@ -133,12 +145,13 @@ app.post('/api/video-metadata', authenticateJWT, (req, res) => {
                 res.status(500).send("Failed to save video metadata");
             } else {
                 console.log("Video metadata saved successfully to SCORM Cloud");
-                res.status(200).send("Video metadata saved successfully");
+                res.status(200).json({ message: "Video uploaded and metadata saved successfully", videoPath: `/uploads/${video.filename}` });
             }
         }
     });
 });
 
+// Error handling middleware
 app.use((err, req, res, next) => {
     console.error("An error occurred:", err.message);
     res.status(500).send("Internal Server Error");
@@ -147,4 +160,7 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
+
+
+
 
