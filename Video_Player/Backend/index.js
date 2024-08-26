@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const TinCan = require('tincanjs');
-const jwt = require('jsonwebtoken');
 const morgan = require('morgan');
 const fs = require('fs');
 const path = require('path');
@@ -18,28 +17,10 @@ app.use(bodyParser.json());
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     next();
 });
-
-// JWT authentication middleware
-const authenticateJWT = (req, res, next) => {
-    const token = req.header('Authorization')?.split(' ')[1];
-
-    if (token) {
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-            if (err) {
-                console.error('JWT verification failed:', err);
-                return res.status(403).send('Forbidden');
-            }
-            req.user = user;
-            next();
-        });
-    } else {
-        res.status(401).send('Unauthorized');
-    }
-};
 
 // Multer setup for file upload
 const storage = multer.diskStorage({
@@ -66,18 +47,7 @@ const upload = multer({
     }
 });
 
-// Route to Generate JWT Token (For Testing Purposes)
-app.post('/api/login', (req, res) => {
-    const { username, email } = req.body;
-    const token = jwt.sign(
-        { name: username, email: email },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-    );
-
-    res.json({ token });
-});
-
+// Initialize the LRS object globally
 let lrs;
 try {
     lrs = new TinCan.LRS({
@@ -93,7 +63,7 @@ try {
 }
 
 // Route to upload video and save metadata
-app.post('/api/upload-video', [authenticateJWT, upload.single('video')], (req, res) => {
+app.post('/api/upload-video', upload.single('video'), (req, res) => {
     const { title, description, duration } = req.body;
     const video = req.file;
 
@@ -111,8 +81,8 @@ app.post('/api/upload-video', [authenticateJWT, upload.single('video')], (req, r
 
     const statement = new TinCan.Statement({
         actor: {
-            mbox: `mailto:${req.user.email}`,
-            name: req.user.name,
+            mbox: `mailto:unknown@example.com`,
+            name: "Unknown User",
         },
         verb: {
             id: "http://adlnet.gov/expapi/verbs/experienced",
@@ -160,7 +130,3 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
-
-
-
-
