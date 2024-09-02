@@ -15,7 +15,7 @@ const mediaRoutes = require("./routes/media");
 app.use("/api/v1/media", mediaRoutes);
 app.use("/public", express.static(path.join(__dirname, "public")));
  
-const mongodbUri = "mongodb+srv://vinayakrajqaz:DWqS4dapWYCxyOGi@cluster0.9xpxu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const mongodbUri = process.env.mongodbUri;
 
 mongoose.connect(mongodbUri, {
   useNewUrlParser: true,
