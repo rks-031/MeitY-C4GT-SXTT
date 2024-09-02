@@ -1,53 +1,34 @@
 require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const path = require("path");
 const TinCan = require('tincanjs');
-const morgan = require('morgan');
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
 
 const app = express();
-const port = process.env.PORT || 5000;
 
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
-app.use(morgan('combined', { stream: accessLogStream }));
+app.use(express.json());
+app.use(cors());
 
-app.use(bodyParser.json());
+const mediaRoutes = require("./routes/media");
 
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    next();
+app.use("/api/v1/media", mediaRoutes);
+app.use("/public", express.static(path.join(__dirname, "public")));
+ 
+const mongodbUri = "mongodb+srv://vinayakrajqaz:DWqS4dapWYCxyOGi@cluster0.9xpxu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose.connect(mongodbUri, {
+  useNewUrlParser: true,
 });
 
-// Multer setup for file upload
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
+mongoose.connection.on("connected", () => {
+  console.log("Connected to MongoDB...");
 });
 
-const upload = multer({ 
-    storage: storage,
-    fileFilter: (req, file, cb) => {
-        const filetypes = /mp4|avi|mov/;
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = filetypes.test(file.mimetype);
-
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb("Error: Only videos are allowed!");
-        }
-    }
+mongoose.connection.on("error", (err) => {
+  console.log("Error connecting to MongoDB", err);
 });
 
-// Initialize the LRS object globally
 let lrs;
 try {
     lrs = new TinCan.LRS({
@@ -62,22 +43,16 @@ try {
     process.exit(1);
 }
 
-// Route to upload video and save metadata
-app.post('/api/upload-video', upload.single('video'), (req, res) => {
-    const { title, description, duration } = req.body;
-    const video = req.file;
 
-    if (!video) {
-        console.error("No video file uploaded");
-        return res.status(400).send("No video file uploaded");
-    }
+app.post('/api/upload-video-metadata', (req, res) => {
+    const { title, description, duration } = req.body;
 
     if (!title || !duration) {
         console.error("Missing video metadata in request body");
         return res.status(400).send("Missing video metadata in request body");
     }
 
-    console.log("Received video metadata:", { title, description, duration, format: video.mimetype });
+    console.log("Received video metadata:", { title, description, duration });
 
     const statement = new TinCan.Statement({
         actor: {
@@ -89,7 +64,7 @@ app.post('/api/upload-video', upload.single('video'), (req, res) => {
             display: { "en-US": "experienced" }
         },
         object: {
-            id: `http://example.com/videos/${video.filename}`,
+            id: `http://example.com/videos/${Date.now()}`, 
             definition: {
                 name: { "en-US": title },
                 description: { "en-US": description }
@@ -100,7 +75,7 @@ app.post('/api/upload-video', upload.single('video'), (req, res) => {
         },
         context: {
             extensions: {
-                "http://example.com/metadata/format": video.mimetype
+                "http://example.com/metadata/format": "N/A" 
             }
         }
     });
@@ -115,18 +90,64 @@ app.post('/api/upload-video', upload.single('video'), (req, res) => {
                 res.status(500).send("Failed to save video metadata");
             } else {
                 console.log("Video metadata saved successfully to SCORM Cloud");
-                res.status(200).json({ message: "Video uploaded and metadata saved successfully", videoPath: `/uploads/${video.filename}` });
+                res.status(200).json({ message: "Video metadata saved successfully" });
             }
         }
     });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error("An error occurred:", err.message);
-    res.status(500).send("Internal Server Error");
+app.post('/api/v1/media/track-progress', (req, res) => {
+    const { mediaId, videoIndex, progressPercentage } = req.body;
+
+    if (!mediaId || typeof videoIndex !== "number" || typeof progressPercentage !== "number") {
+        return res.status(400).send("Invalid request data");
+    }
+
+    console.log("Tracking progress for media:", { mediaId, videoIndex, progressPercentage });
+
+    const statement = new TinCan.Statement({
+        actor: {
+            mbox: `mailto:unknown@example.com`, 
+            name: "Unknown User",
+        },
+        verb: {
+            id: "http://adlnet.gov/expapi/verbs/progressed",
+            display: { "en-US": "progressed" }
+        },
+        object: {
+            id: `http://example.com/videos/${mediaId}/video${videoIndex}`, 
+            definition: {
+                name: { "en-US": `Video ${videoIndex + 1}` },
+                description: { "en-US": "User is progressing through the video." }
+            }
+        },
+        result: {
+            completion: progressPercentage >= 90, 
+            extensions: {
+                "http://example.com/progress": progressPercentage
+            }
+        },
+        context: {
+            extensions: {
+                "http://example.com/mediaId": mediaId,
+                "http://example.com/videoIndex": videoIndex
+            }
+        }
+    });
+
+    lrs.saveStatement(statement, {
+        callback: function (err, xhr) {
+            if (err !== null) {
+                console.error("Failed to save progress statement:", err);
+                res.status(500).send("Failed to save video progress");
+            } else {
+                console.log("Video progress saved successfully to SCORM Cloud");
+                res.status(200).json({ message: "Video progress saved successfully" });
+            }
+        }
+    });
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+app.listen(4000, () => {
+  console.log("App is running on PORT 4000");
 });
